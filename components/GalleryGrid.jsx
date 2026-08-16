@@ -66,71 +66,77 @@ export default function GalleryGrid({ images, onDeleteSuccess }) {
         gap: "20px",
       }}
     >
-      {images.map((img) => (
-        <div
-          key={img.id}
-          style={{
-            border: "1px solid #eaeaea",
-            borderRadius: "8px",
-            overflow: "hidden",
-            backgroundColor: "#fff",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-          }}
-        >
+      {images.map((img, index) => {
+        const formattedDate = img.createdAt
+          ? new Date(img.createdAt).toLocaleDateString()
+          : "Recently";
+
+        return (
           <div
+            key={img.id || index}
             style={{
-              height: "180px",
-              width: "100%",
+              border: "1px solid #eaeaea",
+              borderRadius: "8px",
               overflow: "hidden",
-              backgroundColor: "#f0f0f0",
+              backgroundColor: "#fff",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             }}
           >
-            <img
-              src={img.imageUrl}
-              alt={img.title || "Gallery Image"}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </div>
-          <div style={{ padding: "12px" }}>
-            <h4
+            <div
               style={{
-                margin: "0 0 8px 0",
-                fontSize: "16px",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {img.title || "Untitled Image"}
-            </h4>
-            <p
-              style={{
-                margin: "0 0 12px 0",
-                fontSize: "12px",
-                color: "#888",
-              }}
-            >
-              Added: {new Date(img.createdAt).toLocaleDateString()}
-            </p>
-            <button
-              onClick={() => handleDelete(img.id)}
-              disabled={deletingId === img.id}
-              style={{
+                height: "180px",
                 width: "100%",
-                padding: "8px",
-                backgroundColor: deletingId === img.id ? "#ccc" : "#e53e3e",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: deletingId === img.id ? "not-allowed" : "pointer",
-                fontWeight: "bold",
+                overflow: "hidden",
+                backgroundColor: "#f0f0f0",
               }}
             >
-              {deletingId === img.id ? "Deleting..." : "Delete Image"}
-            </button>
+              <img
+                src={img.imageUrl}
+                alt={img.title || "Gallery Image"}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
+            <div style={{ padding: "12px" }}>
+              <h4
+                style={{
+                  margin: "0 0 8px 0",
+                  fontSize: "16px",
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {img.title || "Untitled Image"}
+              </h4>
+              <p
+                style={{
+                  margin: "0 0 12px 0",
+                  fontSize: "12px",
+                  color: "#888",
+                }}
+              >
+                Added: {formattedDate}
+              </p>
+              <button
+                onClick={() => handleDelete(img.id)}
+                disabled={deletingId === img.id}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  backgroundColor: deletingId === img.id ? "#ccc" : "#e53e3e",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: deletingId === img.id ? "not-allowed" : "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                {deletingId === img.id ? "Deleting..." : "Delete Image"}
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

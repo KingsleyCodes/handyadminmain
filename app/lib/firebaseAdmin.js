@@ -11,27 +11,27 @@ function getAdminDb() {
 
   if (!rawKey) {
     throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT_KEY is missing in environment variables."
+      "FIREBASE_SERVICE_ACCOUNT_KEY environment variable is missing on Vercel."
     );
   }
 
   let serviceAccount;
 
   try {
-    // 1. Try decoding as Base64 first
-    const decodedKey = Buffer.from(rawKey, "base64").toString("utf8");
-    serviceAccount = JSON.parse(decodedKey);
-  } catch {
-    try {
-      // 2. Fallback to direct JSON parse if not Base64
-      serviceAccount = typeof rawKey === "string" ? JSON.parse(rawKey) : rawKey;
-    } catch {
-      // 3. Fallback for raw strings with escaped newlines
-      const sanitizedKey = rawKey.replace(/\\n/g, "\n");
-      serviceAccount = JSON.parse(sanitizedKey);
+    let jsonString = rawKey.trim();
+
+    // If the key is Base64 encoded, decode it to UTF-8 text first
+    if (!jsonString.startsWith("{")) {
+      jsonString = Buffer.from(jsonString, "base64").toString("utf8");
     }
+
+    serviceAccount = JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Firebase Service Account parsing error:", error);
+    throw new Error(`Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY: ${error.message}`);
   }
 
+  // Ensure internal private_key format replaces escaped newlines
   if (serviceAccount.private_key) {
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
   }
