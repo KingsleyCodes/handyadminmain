@@ -18,11 +18,18 @@ function getAdminDb() {
   let serviceAccount;
 
   try {
-    serviceAccount = typeof rawKey === "string" ? JSON.parse(rawKey) : rawKey;
-  } catch (parseError) {
-    // Fallback for double-escaped strings or special characters on Vercel
-    const sanitizedKey = rawKey.replace(/\\n/g, "\n");
-    serviceAccount = JSON.parse(sanitizedKey);
+    // 1. Try decoding as Base64 first
+    const decodedKey = Buffer.from(rawKey, "base64").toString("utf8");
+    serviceAccount = JSON.parse(decodedKey);
+  } catch {
+    try {
+      // 2. Fallback to direct JSON parse if not Base64
+      serviceAccount = typeof rawKey === "string" ? JSON.parse(rawKey) : rawKey;
+    } catch {
+      // 3. Fallback for raw strings with escaped newlines
+      const sanitizedKey = rawKey.replace(/\\n/g, "\n");
+      serviceAccount = JSON.parse(sanitizedKey);
+    }
   }
 
   if (serviceAccount.private_key) {
@@ -36,5 +43,4 @@ function getAdminDb() {
   return getFirestore(app);
 }
 
-// Export dynamic getter function instead of evaluating globally at build time
 export { getAdminDb };
