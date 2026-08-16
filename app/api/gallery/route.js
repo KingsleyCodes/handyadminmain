@@ -1,10 +1,14 @@
 // app/api/gallery/route.js
 import { NextResponse } from "next/server";
-import { adminDb } from "@/app/lib/firebaseAdmin";
+import { getAdminDb } from "@/app/lib/firebaseAdmin";
+
+// Prevent Next.js from pre-rendering this API route at build time
+export const dynamic = "force-dynamic";
 
 // GET: Retrieve images (Filter by category if provided in URL query)
 export async function GET(request) {
   try {
+    const adminDb = getAdminDb();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
 
@@ -36,6 +40,7 @@ export async function GET(request) {
 // POST: Save metadata to Firestore after successful upload
 export async function POST(request) {
   try {
+    const adminDb = getAdminDb();
     const body = await request.json();
     const { title, imageUrl, publicId, category } = body;
 
