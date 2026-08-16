@@ -10,7 +10,7 @@ export default function GalleriesLayout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           
           <Link
-            href="/"
+            href="/dashboard"
             className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-[#0D5C3E] bg-slate-100 hover:bg-slate-200/70 px-3.5 py-2 rounded-xl transition-all"
           >
             <FaArrowLeft className="text-xs" />
