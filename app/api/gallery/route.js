@@ -1,7 +1,6 @@
+// app/api/gallery/route.js
 import { NextResponse } from "next/server";
-
-import { db } from "@/app/lib/db";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { adminDb } from "@/app/lib/firebaseAdmin";
 
 // GET: Retrieve images (Filter by category if provided in URL query)
 export async function GET(request) {
@@ -9,17 +8,14 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
 
-    const galleriesRef = collection(db, "galleries");
-    let q;
+    let queryRef = adminDb.collection("galleries");
 
     if (category) {
-      q = query(galleriesRef, where("category", "==", category));
-    } else {
-      q = query(galleriesRef);
+      queryRef = queryRef.where("category", "==", category);
     }
 
-    const querySnapshot = await getDocs(q);
-    let images = querySnapshot.docs.map((doc) => ({
+    const snapshot = await queryRef.get();
+    let images = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
@@ -30,7 +26,10 @@ export async function GET(request) {
     return NextResponse.json({ success: true, data: images });
   } catch (error) {
     console.error("Firestore fetch error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch images" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch images" },
+      { status: 500 }
+    );
   }
 }
 
@@ -47,8 +46,7 @@ export async function POST(request) {
       );
     }
 
-    const galleriesRef = collection(db, "galleries");
-    const docRef = await addDoc(galleriesRef, {
+    const docRef = await adminDb.collection("galleries").add({
       title: title || "",
       imageUrl,
       publicId,
@@ -58,7 +56,6 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, id: docRef.id });
   } catch (error) {
-    // Detailed server console log to pinpoint exact Firestore issues
     console.error("Firestore write detailed error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to save record to Firestore" },
